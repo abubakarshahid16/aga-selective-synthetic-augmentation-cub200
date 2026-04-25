@@ -1,0 +1,4 @@
+experiment_name,best_epoch,best_val_accuracy,test_accuracy,test_loss,checkpoint_path,warmup_on_real,curriculum
+exp1_real_only,1.0,0.14666666666666667,0.13876423886779427,4.29109733360858,C:\Users\abuba\OneDrive\Desktop\GEN_AI\project\outputs\checkpoints\exp1_real_only.pt,,
+exp2_real_plus_all_synthetic,,0.15166666666666667,0.13669313082499138,,,False,False
+exp3_real_plus_selected_synthetic,,0.15166666666666667,0.1505005177770107,,,False,False

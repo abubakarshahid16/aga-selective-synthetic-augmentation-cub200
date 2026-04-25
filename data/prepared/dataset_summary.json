@@ -1,0 +1,8 @@
+{
+  "num_total": 11788,
+  "num_train": 5394,
+  "num_val": 600,
+  "num_test": 5794,
+  "num_classes": 200,
+  "attributes_csv": "data\\prepared\\attributes_image_level.csv"
+}

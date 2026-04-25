@@ -1,0 +1,63 @@
+{
+  "ready": false,
+  "num_fail": 4,
+  "num_warn": 4,
+  "num_pass": 3,
+  "findings": [
+    {
+      "level": "fail",
+      "check": "benchmark_runs_file",
+      "details": "Missing publication_benchmark_runs.csv."
+    },
+    {
+      "level": "fail",
+      "check": "benchmark_summary_file",
+      "details": "Missing publication_benchmark_summary.csv."
+    },
+    {
+      "level": "fail",
+      "check": "benchmark_config_file",
+      "details": "Missing publication_benchmark_config.json."
+    },
+    {
+      "level": "fail",
+      "check": "ablation_runs_file",
+      "details": "Missing ablation_runs.csv."
+    },
+    {
+      "level": "pass",
+      "check": "ablation_summary_file",
+      "details": "Found ablation_summary.csv."
+    },
+    {
+      "level": "pass",
+      "check": "ablation_variants_present",
+      "details": "All expected ablation variants are present in the summary."
+    },
+    {
+      "level": "warn",
+      "check": "ablation_num_seeds",
+      "details": "Ablation summary does not contain num_seeds."
+    },
+    {
+      "level": "pass",
+      "check": "selection_stats_present",
+      "details": "Selection stats found with 15 selected of 400 candidates."
+    },
+    {
+      "level": "warn",
+      "check": "selection_threshold_strength",
+      "details": "Saved selection confidence threshold is low (0.0200); justify or rerun with stronger settings."
+    },
+    {
+      "level": "warn",
+      "check": "dino_effect_observed",
+      "details": "DINO pruning removed 0 samples in the saved run, so its value is not demonstrated."
+    },
+    {
+      "level": "warn",
+      "check": "base_paper_comparison_ready",
+      "details": "Base-paper comparison file exists but does not yet support an 'improves the base paper' claim."
+    }
+  ]
+}

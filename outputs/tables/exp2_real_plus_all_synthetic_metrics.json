@@ -1,0 +1,36 @@
+{
+  "experiment_name": "exp2_real_plus_all_synthetic",
+  "model_name": "resnet18",
+  "warmup_on_real": false,
+  "curriculum": false,
+  "curriculum_ratio": 0.5,
+  "final_checkpoint": "C:\\Users\\abuba\\OneDrive\\Desktop\\GEN_AI\\project\\outputs\\checkpoints\\exp2_real_plus_all_synthetic.pt",
+  "num_final_train_samples": 5794,
+  "phase_summaries": [
+    {
+      "experiment_name": "exp2_real_plus_all_synthetic_main",
+      "best_epoch": 1,
+      "best_val_accuracy": 0.15166666666666667,
+      "test_accuracy": 0.13669313082499138,
+      "test_loss": 4.264014340300862,
+      "checkpoint_path": "C:\\Users\\abuba\\OneDrive\\Desktop\\GEN_AI\\project\\outputs\\checkpoints\\exp2_real_plus_all_synthetic_main.pt",
+      "manifest_summary": {
+        "name": "main",
+        "num_samples": 5794,
+        "num_classes": 200,
+        "source_counts": {
+          "real": 5394,
+          "synthetic": 400
+        }
+      }
+    }
+  ],
+  "final_summary": {
+    "experiment_name": "exp2_real_plus_all_synthetic_main",
+    "best_epoch": 1,
+    "best_val_accuracy": 0.15166666666666667,
+    "test_accuracy": 0.13669313082499138,
+    "test_loss": 4.264014340300862,
+    "checkpoint_path": "C:\\Users\\abuba\\OneDrive\\Desktop\\GEN_AI\\project\\outputs\\checkpoints\\exp2_real_plus_all_synthetic_main.pt"
+  }
+}

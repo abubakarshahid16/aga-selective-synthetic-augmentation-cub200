@@ -1,0 +1,2 @@
+num_candidates,num_after_confidence_clip_dino,num_selected,num_rejected,selection_rate,confidence_threshold,clip_threshold,max_synth_to_real_ratio,used_clip_filter,used_dino_filter,used_class_balance,use_attribute_coverage
+400,15,15,385,0.0375,0.02,0.2,0.75,True,True,True,True

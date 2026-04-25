@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local datasets and large artifacts
+data/CUB_200_2011/images/
+data/CUB_200_2011/**/*.jpg
+data/CUB_200_2011/**/*.png
+models/
+
+# Ignore most generated outputs by default
+outputs/checkpoints/
+outputs/logs/
+outputs/samples/synthetic_candidates/
+outputs/tables/*_history.csv
+outputs/tables/*_train_manifest.csv
+outputs/tables/*_synthetic_subset.csv
+outputs/tables/*_selected.csv
+outputs/tables/*_classification_report.csv
+outputs/tables/*_per_class_accuracy.csv
+outputs/tables/*_per_class_gains_losses.csv
+outputs/tables/*_phase_metrics.csv
+outputs/tables/*_metrics.json
+outputs/tables/*_main_metrics.json
+
+# Keep proof artifacts used by the README and paper
+!outputs/plots/
+!outputs/plots/*.png
+!outputs/samples/accepted_synthetic_grid.png
+!outputs/samples/rejected_synthetic_grid.png
+!outputs/samples/real_vs_synthetic_vs_accepted_vs_rejected_grid.png
+!outputs/samples/synthetic_candidate_grid.png
+!outputs/confusion_matrices/
+!outputs/confusion_matrices/*.png
+!outputs/tables/experiment_comparison.csv
+!outputs/tables/ablation_summary.csv
+!outputs/tables/accepted_rejected_sample_statistics.csv
+!outputs/tables/sample_diversity_statistics.csv
+!outputs/tables/dino_pruning_stats.csv
+!outputs/tables/publication_readiness.json
+!outputs/tables/base_paper_comparison.csv
+!outputs/tables/exp1_real_only_metrics.json
+!outputs/tables/exp2_real_plus_all_synthetic_metrics.json
+!outputs/tables/exp3_real_plus_selected_synthetic_metrics.json
+

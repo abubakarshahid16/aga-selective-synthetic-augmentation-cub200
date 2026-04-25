@@ -1,0 +1,2 @@
+base_paper_name,base_paper_method_exactly_reproduced,same_dataset_split,same_backbone_or_fair_match,same_training_budget,our_method_accuracy,our_method_macro_f1,base_paper_accuracy,base_paper_macro_f1,comparison_ready,claim_allowed,notes
+AGA / Automated Generative Data Augmentation,False,False,False,False,,,,False,False,"Fill this only after a like-for-like comparison is prepared. Until then, do not claim improvement over the base paper."

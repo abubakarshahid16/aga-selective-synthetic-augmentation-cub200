@@ -1,0 +1,6 @@
+experiment_name,warmup_on_real,curriculum,final_test_accuracy,final_best_val_accuracy,final_checkpoint
+ablation_confidence_only,False,False,0.1555056955471177,0.155,C:\Users\abuba\OneDrive\Desktop\GEN_AI\project\outputs\checkpoints\ablation_confidence_only.pt
+ablation_confidence_clip,False,False,0.1505005177770107,0.15166666666666667,C:\Users\abuba\OneDrive\Desktop\GEN_AI\project\outputs\checkpoints\ablation_confidence_clip.pt
+ablation_confidence_clip_dino,False,False,0.1505005177770107,0.15166666666666667,C:\Users\abuba\OneDrive\Desktop\GEN_AI\project\outputs\checkpoints\ablation_confidence_clip_dino.pt
+ablation_confidence_clip_dino_balance,False,False,0.1505005177770107,0.15166666666666667,C:\Users\abuba\OneDrive\Desktop\GEN_AI\project\outputs\checkpoints\ablation_confidence_clip_dino_balance.pt
+ablation_full_attribute,False,False,0.1505005177770107,0.15166666666666667,C:\Users\abuba\OneDrive\Desktop\GEN_AI\project\outputs\checkpoints\ablation_full_attribute.pt

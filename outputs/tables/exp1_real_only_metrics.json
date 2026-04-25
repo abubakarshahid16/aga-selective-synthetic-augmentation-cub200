@@ -1,0 +1,8 @@
+{
+  "experiment_name": "exp1_real_only",
+  "best_epoch": 1,
+  "best_val_accuracy": 0.14666666666666667,
+  "test_accuracy": 0.13876423886779427,
+  "test_loss": 4.29109733360858,
+  "checkpoint_path": "C:\\Users\\abuba\\OneDrive\\Desktop\\GEN_AI\\project\\outputs\\checkpoints\\exp1_real_only.pt"
+}
