@@ -16,6 +16,7 @@ Thumbs.db
 .idea/
 
 # Local datasets and large artifacts
+data/CUB_200_2011/
 data/CUB_200_2011/images/
 data/CUB_200_2011/**/*.jpg
 data/CUB_200_2011/**/*.png
