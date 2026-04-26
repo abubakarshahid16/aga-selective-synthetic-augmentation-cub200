@@ -1,183 +1,293 @@
 \documentclass[conference]{IEEEtran}
 \IEEEoverridecommandlockouts
+
 \usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts}
-\usepackage{algorithmic}
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{xcolor}
-\usepackage{array}
+\usepackage{booktabs}
+\usepackage{url}
+
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
-    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
 \begin{document}
 
-\title{A Practical AGA-Inspired Selective Synthetic Augmentation Framework for Fine-Grained Bird Classification on CUB-200-2011}
+\title{Quality over Quantity: A Practical AGA-Inspired Selective Synthetic Augmentation Framework for Fine-Grained Bird Classification}
 
 \author{
-\IEEEauthorblockN{Author Name}
-\IEEEauthorblockA{\textit{Department Name} \\
-\textit{University Name}\\
-City, Country \\
-email@domain.com}
+\IEEEauthorblockN{Abubakar Shahid}
+\IEEEauthorblockA{\textit{Department of Computer Science} \\
+\textit{FAST University}\\
+Islamabad, Pakistan \\
+abubakarshahid832@gmail.com}
 \and
-\IEEEauthorblockN{Supervisor Name}
-\IEEEauthorblockA{\textit{Department Name} \\
-\textit{University Name}\\
-City, Country \\
-email@domain.com}
+\IEEEauthorblockN{Dr. Noman Noor}
+\IEEEauthorblockA{\textit{Department of Computer Science} \\
+\textit{FAST University}\\
+Islamabad, Pakistan}
 }
 
 \maketitle
 
 \begin{abstract}
-Fine-grained image classification remains difficult because visually similar classes require highly discriminative supervision, while naively augmenting training data with synthetic images can introduce substantial noise. This paper studies a practical AGA-inspired synthetic augmentation pipeline for CUB-200-2011 in which generated bird images are not accepted blindly but filtered through a selective sample-admission process. The implemented framework combines class-consistency scoring, CLIP-based semantic filtering, DINO-based diversity pruning, class-balance control, and optional attribute-aware coverage. In the saved experimental results, selective synthetic augmentation improved test accuracy from 0.1388 in a real-only baseline to 0.1505, while naive real-plus-all-synthetic augmentation reached 0.1367. The ablation results support the broader claim that synthetic sample selection matters, while also showing that the more complex filtering stack did not outperform confidence-only selection in the saved run. Because the evaluation was conducted under constrained compute and the full multi-seed benchmark package is still incomplete, the present evidence should be interpreted as preliminary but reproducible rather than as an exhaustive benchmark study.
+Fine-grained image classification remains difficult because closely related categories often differ through subtle shape, texture, color, and part-level details. Synthetic augmentation offers a possible way to improve data diversity, but indiscriminately adding generated images can also introduce noise, class drift, and visually implausible samples. This paper presents a practical AGA-inspired selective synthetic augmentation framework for fine-grained bird classification on CUB-200-2011. The framework first generates synthetic bird-image candidates and then admits only selected samples into final training using classifier confidence, CLIP semantic alignment, DINO-based diversity checking, class-balance control, and optional attribute-aware coverage. In the saved repository run, the real-only baseline achieved 0.1388 test accuracy and 0.1111 macro F1, while adding all synthetic candidates reduced performance to 0.1367 accuracy and 0.1025 macro F1. In contrast, selective admission improved performance to 0.1505 accuracy and 0.1206 macro F1. The ablation results show that confidence-based screening was the strongest individual signal, while the broader pipeline remained useful for building a conservative and interpretable selection process. The work is presented as a reproducible empirical study under constrained compute, not as a direct superiority claim over the original AGA paper.
 \end{abstract}
 
 \begin{IEEEkeywords}
-fine-grained classification, synthetic augmentation, CLIP, DINO, CUB-200-2011, empirical study
+fine-grained image classification, synthetic augmentation, selective admission, CLIP, DINO, CUB-200-2011, empirical study
 \end{IEEEkeywords}
 
 \section{Introduction}
-Fine-grained visual classification is challenging because classes often differ by subtle local cues, pose, texture, and part structure rather than by broad object shape alone. In bird recognition datasets such as CUB-200-2011, small appearance variations and strong background bias make the learning problem especially difficult. Synthetic augmentation is an appealing strategy for increasing data diversity, but adding all generated samples without verification can degrade the training signal rather than improve it.
+Fine-grained visual recognition is challenging because different categories often share the same global object structure and vary only through subtle local characteristics. In bird classification, these characteristics may include beak shape, crown color, breast pattern, wing markings, tail structure, and small texture differences. The CUB-200-2011 benchmark is therefore a standard and meaningful testbed for studying fine-grained classification difficulty \cite{wah2011}.
 
-This work studies a practical and reproducible alternative: generated candidates are passed through a selective admission process before they are added to the final training set. The key idea is that not every generated image is equally useful for downstream recognition. Instead of rewarding synthetic quantity, the proposed pipeline rewards synthetic quality. The method is intentionally described as \emph{AGA-inspired} rather than as an exact reproduction of Automated Generative Data Augmentation (AGA), because the implemented generation stage is a practical foreground-preserving approximation rather than a matched reimplementation of the original upstream method.
+Synthetic augmentation is appealing in this setting because it may expand the visual diversity of training data without requiring additional manual collection. However, generated data is not automatically helpful. In fine-grained tasks, even small distortions can damage class identity. If synthetic images contain incorrect species cues, unrealistic anatomy, or noisy background-context interactions, they may weaken rather than strengthen the training signal.
 
-The main contribution of this paper is not a claim of state-of-the-art performance. The contribution is a selective synthetic augmentation workflow that is fully implemented, reproducible, and empirically evaluated on CUB-200-2011. Under the saved run in this repository, selected synthetic augmentation outperformed both the real-only baseline and a naive real-plus-all-synthetic setting. The current evidence therefore supports a careful empirical claim: synthetic selection quality mattered more than synthetic quantity in the evaluated setup.
+This paper studies a practical alternative: selective admission of synthetic samples. Rather than treating all generated images as equally useful, the proposed framework evaluates each candidate and accepts only a small subset judged to be sufficiently reliable for final training. The approach is described as AGA-inspired because it follows the motivation of automated generative augmentation while using a practical local pipeline suited to the available data, tools, and compute budget.
+
+The main contribution of this work is not a state-of-the-art claim. Instead, the paper offers a reproducible, evidence-driven workflow showing that synthetic sample quality can matter more than synthetic sample quantity. In the saved experiments, a carefully selected synthetic subset improved over both a real-only baseline and a naive all-synthetic control.
+
+The specific contributions of this paper are:
+\begin{itemize}
+    \item a practical AGA-inspired selective synthetic augmentation framework for fine-grained bird classification;
+    \item a reproducible experimental workflow with saved manifests, logs, tables, plots, confusion matrices, and qualitative sample grids;
+    \item an internal empirical comparison showing that selected synthetic samples improved performance while unfiltered synthetic expansion did not;
+    \item a claim-safe interpretation that clearly separates internal experimental gains from unsupported direct superiority claims over the base AGA paper.
+\end{itemize}
 
 \section{Related Work}
-Fine-grained recognition on CUB-200-2011 has been widely used to study subtle visual discrimination and dataset-specific challenges such as pose, background bias, and part-level variation \cite{wah2011}. More recent work has explored the use of generative models and synthetic augmentation to improve image classification, including practical efforts to incorporate generated samples into downstream supervised training pipelines \cite{rahat2025}.
+\subsection{Fine-Grained Bird Classification}
+Fine-grained recognition has long been studied because it requires models to identify subtle inter-class differences that are often difficult even for human observers. The CUB-200-2011 dataset provides 200 bird species with image labels, bounding boxes, and attributes, making it one of the most widely used benchmarks for this problem \cite{wah2011}. Practical deep learning baselines for this domain commonly use convolutional backbones such as ResNet because they offer a strong and reproducible starting point \cite{he2016}.
 
-Large vision-language models such as CLIP provide a useful way to score semantic agreement between an image and its intended class text, making them attractive for filtering noisy synthetic samples \cite{radford2021}. Self-supervised visual encoders such as DINO have also shown strong representation quality for measuring similarity and diversity among images \cite{caron2021}. This paper combines these ideas in a single sample-admission pipeline, but the current evidence suggests that the overall selective framework is more strongly supported than any claim about the necessity of each individual module.
+\subsection{Synthetic Augmentation}
+Classical augmentation improves generalization through operations such as cropping, flipping, color jittering, and geometric perturbation. Generative augmentation aims to go further by creating new training samples with broader appearance variation. However, the usefulness of generative augmentation depends on whether the generated images preserve task-relevant class identity. This issue becomes especially important in fine-grained recognition, where small artifacts may significantly alter the meaning of a sample \cite{rahat2025}.
+
+\subsection{Semantic and Diversity-Based Filtering}
+CLIP provides transferable image-text representations that can be used to estimate whether an image is semantically aligned with its intended class description \cite{radford2021}. DINO-style self-supervised features provide strong visual embeddings for measuring similarity and detecting near-duplicate samples \cite{caron2021}. These signals are attractive for synthetic data filtering because they support semantic agreement checks, redundancy control, and more conservative admission of generated samples.
 
 \section{Method}
 \subsection{Dataset and Split}
-All experiments use the CUB-200-2011 dataset \cite{wah2011}. In the prepared repository split, the dataset contains 11,788 images across 200 classes, with 5,394 training images, 600 validation images, and 5,794 test images. Optional image-level attribute metadata from CUB is retained as auxiliary information for the attribute-aware coverage variant.
+All experiments use the CUB-200-2011 bird dataset \cite{wah2011}. The prepared repository split contains 5,394 training images, 600 validation images, and 5,794 test images across 200 classes. Optional image-level attribute metadata is preserved for the attribute-aware variant of the selection pipeline.
 
-\subsection{AGA-Inspired Candidate Generation}
-The generation stage is implemented as a foreground-preserving augmentation pipeline rather than as a strict reimplementation of the base AGA method. Bird foregrounds are preserved using available dataset structure, while context and appearance are perturbed to create candidate synthetic images. This design keeps the project reproducible inside a constrained environment while still producing a large candidate pool for downstream filtering.
+Fig.~\ref{fig:real_distribution} shows the training-set distribution used in the saved experiments. The distribution is nearly balanced, which is important because it reduces the risk that the main result is simply an artifact of heavy real-data imbalance.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig_real_train_distribution_ai.png}
+\caption{Real training distribution across the prepared CUB-200-2011 split. Most classes contain nearly the same number of real training images, indicating a largely balanced starting point.}
+\label{fig:real_distribution}
+\end{figure}
+
+\subsection{Framework Overview}
+The proposed workflow is summarized in Fig.~\ref{fig:method_pipeline}. The pipeline begins with real CUB images, generates synthetic candidates, scores those candidates through multiple filtering stages, and then trains a final model on real images plus the admitted synthetic subset.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_method_pipeline.png}
+\caption{Overview of the proposed AGA-inspired selective synthetic augmentation framework. Synthetic candidates are generated first and then filtered through confidence screening, CLIP semantic alignment, DINO diversity pruning, class-balance control, and optional attribute-aware coverage before final training.}
+\label{fig:method_pipeline}
+\end{figure*}
+
+\subsection{Synthetic Candidate Generation}
+The candidate-generation stage is implemented as a practical approximation of the original AGA idea rather than an exact reproduction of the published method. The repository preserves bird foreground structure using dataset information and foreground estimation, then introduces controlled appearance and context variation to create synthetic candidates. This design keeps the workflow reproducible while still producing a meaningful candidate pool for downstream filtering.
+
+Representative synthetic candidates are shown in Fig.~\ref{fig:synthetic_candidates}. The examples reveal visually diverse samples, but they also motivate the need for selection: some generated candidates may look plausible at first glance while still containing cues that are ambiguous, noisy, or less trustworthy for fine-grained learning.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_synthetic_candidate_grid_ai.png}
+\caption{Representative AGA-inspired synthetic candidates before selective filtering. The candidate pool is visually diverse, but not every sample is equally suitable for fine-grained training.}
+\label{fig:synthetic_candidates}
+\end{figure*}
 
 \subsection{Selective Sample Admission}
-The proposed admission pipeline evaluates synthetic candidates using four main signals.
+Each synthetic candidate is evaluated before it is allowed into the final training set. The selection process uses:
 \begin{itemize}
-\item Class-consistency confidence from the baseline classifier
-\item CLIP semantic alignment to the intended bird class
-\item DINO diversity pruning to reduce redundancy
-\item Class-balance control, with an optional attribute-aware coverage variant
+    \item classifier confidence for class-consistency screening;
+    \item CLIP image-text alignment for semantic agreement with the intended class;
+    \item DINO feature similarity for diversity control and near-duplicate detection;
+    \item class-balance control to avoid synthetic overrepresentation;
+    \item optional attribute-aware coverage to preserve fine-grained visual cues.
 \end{itemize}
 
-The final selected set is intentionally small. In the saved run, 400 synthetic candidates were generated and only 15 were retained after filtering, corresponding to a selection rate of 3.75\%. This aggressive filtering is central to the paper's empirical story.
+The admission strategy is intentionally conservative. In the saved run, 400 synthetic candidates were generated and only 15 were accepted, corresponding to a 3.75\% admission rate. Fig.~\ref{fig:selection_funnel} visualizes this process and reinforces the central idea of the paper: the method prioritizes reliability over synthetic volume.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig_selection_funnel.png}
+\caption{Selective admission funnel. Out of 400 generated candidates, only 15 were admitted for final training, giving a 3.75\% acceptance rate.}
+\label{fig:selection_funnel}
+\end{figure}
 
 \subsection{Training Protocol}
-The repository includes three main experiments:
+The repository preserves three main experimental settings:
 \begin{itemize}
-\item \texttt{exp1\_real\_only}: supervised training on real images only
-\item \texttt{exp2\_real\_plus\_all\_synthetic}: training with all synthetic candidates
-\item \texttt{exp3\_real\_plus\_selected\_synthetic}: training with only the selected synthetic subset
+    \item \texttt{exp1\_real\_only}: supervised training on real data only;
+    \item \texttt{exp2\_real\_plus\_all\_synthetic}: training on real data plus all generated synthetic candidates;
+    \item \texttt{exp3\_real\_plus\_selected\_synthetic}: training on real data plus only the final selected synthetic subset.
 \end{itemize}
 
-The saved experiments use a ResNet-18 backbone with 224 pixel inputs, 30 epochs, patience 7, batch size 32, learning rate 0.0003, weight decay 0.0001, and label smoothing 0.1. The current paper is based on the saved repository outputs rather than on a completed multi-seed benchmark package.
+The saved selected-synthetic run uses a ResNet18 backbone with 224-pixel inputs. The manuscript reports the preserved single-run outputs directly and does not claim a completed multi-seed benchmark study.
 
-\section{Experimental Evidence}
-\subsection{Main Results}
-Table \ref{tab:main_results} summarizes the saved main experiment results. The selected-synthetic configuration achieved the highest test accuracy among the three main settings.
+\section{Results}
+\subsection{Main Experimental Results}
+Table~\ref{tab:main_results} reports the saved main experiment outputs. The selected-synthetic setting achieved the best test accuracy and the best macro F1 among the three internal comparisons.
 
-\begin{table}[htbp]
-\caption{Saved main experiment results from the current repository outputs.}
+\begin{table}[t]
+\caption{Saved main experiment results from the repository outputs.}
 \label{tab:main_results}
-\begin{center}
-\begin{tabular}{|p{3.1cm}|c|c|}
-\hline
-\textbf{Experiment} & \textbf{Test Accuracy} & \textbf{Macro-F1} \\
-\hline
-Real-only baseline & 0.1388 & 0.1111 \\
-\hline
-Real + all synthetic & 0.1367 & 0.1025 \\
-\hline
-Real + selected synthetic & 0.1505 & 0.1206 \\
-\hline
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Experiment} & \textbf{Accuracy} & \textbf{Macro F1} \\
+\midrule
+Real only baseline & 0.1388 & 0.1111 \\
+Real plus all synthetic & 0.1367 & 0.1025 \\
+Real plus selected synthetic & \textbf{0.1505} & \textbf{0.1206} \\
+\bottomrule
 \end{tabular}
-\end{center}
 \end{table}
 
-The results support two practical observations. First, adding all synthetic samples did not improve performance in the saved run. Second, selective synthetic augmentation improved over both internal controls under the same overall training setup.
+The visual summary in Fig.~\ref{fig:main_internal_comparison} makes the pattern clear. Compared with the real-only baseline, selective admission improved test accuracy by 0.0117 absolute points, which corresponds to an 8.4\% relative gain. Compared with the naive all-synthetic condition, selective admission improved test accuracy by 0.0138 absolute points, or approximately 10.1\% relative improvement. Macro F1 follows the same pattern, increasing from 0.1111 to 0.1206 over the real-only baseline and from 0.1025 to 0.1206 over the naive synthetic setting.
+
+This is the core empirical result of the paper: simply adding more synthetic data did not help, but selecting a small and more reliable subset did.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig_main_internal_comparison.png}
+\caption{Main internal comparison across the three experimental settings. Selected synthetic admission improved both test accuracy and macro F1 over real-only training and naive all-synthetic training.}
+\label{fig:main_internal_comparison}
+\end{figure}
 
 \subsection{Ablation Results}
-Table \ref{tab:ablation_results} reports the saved ablation results. The strongest saved result came from confidence-only filtering, while the more complex variants produced the same lower accuracy in the current run.
+Table~\ref{tab:ablation_results} summarizes the saved ablation outputs. The confidence-only variant achieved the highest saved accuracy, while the more elaborate variants matched the selected-synthetic main result.
 
-\begin{table}[htbp]
-\caption{Saved ablation results from the current repository outputs.}
+\begin{table}[t]
+\caption{Saved ablation results from the repository outputs.}
 \label{tab:ablation_results}
-\begin{center}
-\begin{tabular}{|p{4.2cm}|c|}
-\hline
-\textbf{Ablation Variant} & \textbf{Test Accuracy} \\
-\hline
-Confidence only & 0.1555 \\
-\hline
-Confidence + CLIP & 0.1505 \\
-\hline
-Confidence + CLIP + DINO & 0.1505 \\
-\hline
-Confidence + CLIP + DINO + balance & 0.1505 \\
-\hline
-Confidence + CLIP + DINO + balance + attribute coverage & 0.1505 \\
-\hline
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Variant} & \textbf{Accuracy} \\
+\midrule
+Confidence only & \textbf{0.1555} \\
+Confidence plus CLIP & 0.1505 \\
+Confidence plus CLIP plus DINO & 0.1505 \\
+Confidence plus CLIP plus DINO plus balance & 0.1505 \\
+Full attribute-aware variant & 0.1505 \\
+\bottomrule
 \end{tabular}
-\end{center}
 \end{table}
 
-These ablations support the selective-admission idea, but they do not support a strong claim that all additional filtering stages improved over confidence-only selection.
+Fig.~\ref{fig:ablation_interpretation} helps interpret the ablation behavior. The results support the broader principle of selective admission, but they do not justify a strong claim that every added module improved accuracy in this saved run. Instead, the evidence suggests that classifier confidence was the strongest individual signal, while the additional filters mainly made the pipeline more conservative, structured, and easier to justify.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig_ablation_interpretation.png}
+\caption{Ablation interpretation for the selective admission pipeline. Confidence-only filtering achieved the highest saved accuracy, while the full pipeline matched the selected-synthetic main result.}
+\label{fig:ablation_interpretation}
+\end{figure}
 
 \subsection{Selection Statistics}
-The selection statistics further justify the paper's central claim. Out of 400 synthetic candidates, 15 were retained and 385 were rejected. The mean combined score of the selected pool was 0.2285, and the mean CLIP score was 0.3361. DINO pruning did not remove any samples under the saved threshold of 0.96, so the current run does not demonstrate a measurable DINO benefit.
+The selection statistics are summarized in Table~\ref{tab:selection_stats}. Out of 400 generated candidates, 385 were rejected and only 15 were retained. The saved DINO pruning statistics indicate that no additional samples were removed at the stored similarity threshold, suggesting that earlier filtering stages had already produced a very small candidate set or that the DINO threshold was conservative.
 
-\section{Qualitative Evidence}
-Fig. \ref{fig:candidates} shows representative synthetic candidates from the generation stage. Fig. \ref{fig:accepted_rejected} contrasts accepted and rejected synthetic examples, illustrating the qualitative purpose of the selection module. Fig. \ref{fig:main_plot} summarizes the main experiment comparison, and Fig. \ref{fig:ablation_plot} visualizes the ablation study.
+\begin{table}[t]
+\caption{Saved selection statistics from the repository outputs.}
+\label{tab:selection_stats}
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Statistic} & \textbf{Value} \\
+\midrule
+Generated candidates & 400 \\
+Accepted candidates & 15 \\
+Rejected candidates & 385 \\
+Selection rate & 3.75\% \\
+DINO removals at saved threshold & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\begin{figure}[htbp]
-\centerline{\includegraphics[width=0.48\textwidth]{../outputs/samples/synthetic_candidate_grid.png}}
-\caption{Synthetic candidate examples produced by the AGA-inspired generation pipeline.}
-\label{fig:candidates}
+\subsection{Prediction and Optimization Evidence}
+Fig.~\ref{fig:confusion_matrix} presents the confusion matrix for the selected-synthetic experiment. The visible diagonal structure indicates that the model learned class-specific cues for a subset of bird categories, while the wide off-diagonal scatter shows that many fine-grained distinctions remain difficult. This outcome is consistent with the low absolute accuracy values and the inherent difficulty of 200-class fine-grained recognition under a constrained ResNet18 setting.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig_selected_confusion_matrix_ai.png}
+\caption{Confusion matrix for the selected-synthetic experiment. The diagonal trend indicates correct predictions for some classes, while the off-diagonal activity reflects persistent fine-grained confusion.}
+\label{fig:confusion_matrix}
 \end{figure}
 
-\begin{figure}[htbp]
-\centerline{\includegraphics[width=0.48\textwidth]{../outputs/samples/real_vs_synthetic_vs_accepted_vs_rejected_grid.png}}
-\caption{Qualitative comparison of real, synthetic, accepted, and rejected samples.}
-\label{fig:accepted_rejected}
+Fig.~\ref{fig:loss_curves} provides complementary optimization evidence. The training loss decreases steadily across epochs, while the validation loss also declines but more gradually and begins to flatten in later epochs. This pattern suggests that the model continued fitting the training data while achieving slower generalization gains on validation data. In practical terms, the figure supports two useful interpretations: first, the selected-synthetic run was stable rather than erratic; second, there is room for stronger regularization, better backbones, or more extensive tuning in future work.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig_selected_loss_curves_ai.png}
+\caption{Training and validation loss curves for the selected-synthetic experiment. The smooth decline indicates stable optimization, while the slower validation improvement suggests remaining generalization limits.}
+\label{fig:loss_curves}
 \end{figure}
 
-\begin{figure}[htbp]
-\centerline{\includegraphics[width=0.48\textwidth]{../outputs/plots/experiment_comparison_accuracy.png}}
-\caption{Accuracy comparison across the three main experiments.}
-\label{fig:main_plot}
-\end{figure}
+\section{Qualitative Analysis}
+Fig.~\ref{fig:selection_grid} compares real images, synthetic candidates, accepted synthetic samples, and rejected synthetic samples. The accepted subset generally preserves more recognizable bird structure and more plausible class-relevant appearance, while the rejected subset contains examples that appear less trustworthy, more ambiguous, or less useful for learning fine-grained distinctions. This visual pattern aligns well with the quantitative result that blind synthetic expansion did not improve performance.
 
-\begin{figure}[htbp]
-\centerline{\includegraphics[width=0.48\textwidth]{../outputs/plots/ablation_comparison_accuracy.png}}
-\caption{Ablation comparison across the selection variants.}
-\label{fig:ablation_plot}
-\end{figure}
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_selection_grid_ai.png}
+\caption{Qualitative comparison of real images, synthetic candidates, accepted synthetic samples, and rejected synthetic samples. The retained examples are visually more suitable for training than the discarded ones.}
+\label{fig:selection_grid}
+\end{figure*}
+
+Fig.~\ref{fig:accepted_grid} isolates the accepted synthetic samples used in the final selected-synthetic experiment. Although the admitted set is small, it still provides meaningful appearance diversity without overwhelming the real-data distribution with noisy candidates. This supports the central design choice of the paper: selective reliability is more valuable than large synthetic volume.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_accepted_synthetic_grid_ai.png}
+\caption{Accepted synthetic samples retained by the selective admission process. The final admitted set is small but visually diverse and more credible for training than the broader candidate pool.}
+\label{fig:accepted_grid}
+\end{figure*}
+
+\section{Positioning Relative to the Base AGA Paper}
+Table~\ref{tab:base_comparison} clarifies how the present work should be positioned relative to the original AGA paper. The current repository does not support a direct superiority claim because the dataset focus, generation procedure, backbone, compute budget, and evaluation protocol are not matched. The valid claim is narrower and more defensible: within the saved local setup, selected synthetic admission outperformed both a real-only baseline and a naive all-synthetic control.
+
+\begin{table}[t]
+\caption{Claim-safe positioning relative to the referenced AGA paper.}
+\label{tab:base_comparison}
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Criterion} & \textbf{Base AGA} & \textbf{This Work} \\
+\midrule
+Primary goal & Generative augmentation & Selective admission \\
+Dataset family & Image classification & Fine-grained birds \\
+Exact method match & Yes & No, AGA-inspired \\
+Evaluation protocol & Original setting & Saved single run \\
+Direct superiority claim & Not applicable & Not claimed \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Discussion}
-The current evidence supports a narrow but useful conclusion. In this setup, blindly adding synthetic data was not beneficial, but filtering synthetic data before final training was beneficial. This finding is practically relevant because it suggests that synthetic augmentation pipelines should invest more effort in admission quality than in candidate quantity.
+The strongest message from the saved results is straightforward: synthetic augmentation was beneficial only when it was selective. The all-synthetic condition slightly underperformed the real-only baseline, which indicates that synthetic quantity by itself was not useful in this setup. By contrast, the selected-synthetic setting improved both accuracy and macro F1, showing that a small curated subset can be more valuable than a larger unfiltered synthetic pool.
 
-At the same time, the current ablation results caution against overclaiming. The broader selective-admission framework is supported, but the individual roles of CLIP, DINO, class-balance control, and attribute-aware coverage are not equally justified by the present saved run. In particular, the DINO pruning stage did not remove any samples under the stored threshold, and the full filtering stack did not surpass confidence-only filtering.
+The ablation results refine this story. Confidence-based screening appears to be the strongest single mechanism in the saved run, but the broader pipeline still has methodological value because it provides semantic checking, diversity control, class-balance reasoning, and an interpretable structure for deciding which samples should be trusted. In that sense, the full framework is useful even when every component does not produce a separate gain in one particular run.
+
+The loss-curve evidence also adds an important interpretation. Training improved smoothly across epochs, while validation loss decreased more slowly and began to flatten. This suggests that the selected-synthetic experiment learned meaningful structure without catastrophic instability, but it also indicates that the current setup remains limited in generalization. A stronger backbone, more extensive hyperparameter tuning, or repeated multi-seed experiments may reveal larger and more consistent gains.
 
 \section{Limitations}
-This study has four important limitations. First, the generation stage is AGA-inspired rather than an exact reproduction of the original AGA paper. Second, the strongest current evidence comes from saved single-run outputs rather than from a completed multi-seed benchmark package. Third, the experiments were conducted under compute and environment constraints, which limited the scale of repeated training. Fourth, the base-paper comparison file in the repository does not currently support a fair claim of improvement over the WACV 2025 method.
+This work has several important limitations. First, the generation stage is AGA-inspired rather than an exact reproduction of the published method. Second, the strongest evidence comes from saved single-run outputs rather than a full multi-seed benchmark with means and standard deviations. Third, compute constraints limited the scale of repeated experimentation and model exploration. Fourth, the absolute accuracy remains low for a 200-class fine-grained benchmark, so the result should be treated as a controlled empirical finding rather than a competitive leaderboard claim. Fifth, the repository does not currently support a fair like-for-like improvement claim over the base AGA paper.
 
-These limitations do not invalidate the paper's empirical contribution, but they do narrow the claims that can be made responsibly. The paper should therefore be positioned as a reproducible empirical study under constrained compute rather than as a definitive benchmark paper.
+These limitations narrow the strongest defensible claims, but they do not remove the value of the contribution. The framework is complete, reproducible, and supported by preserved quantitative and qualitative evidence.
 
 \section{Conclusion}
-This paper presented a practical AGA-inspired selective synthetic augmentation framework for fine-grained bird classification on CUB-200-2011. Under the saved repository results, selected synthetic augmentation outperformed both a real-only baseline and a naive all-synthetic condition, supporting the central claim that synthetic sample quality mattered more than synthetic quantity in the tested setup. The evidence also showed that the broader selective-admission idea is more strongly justified than any claim about the necessity of every added filtering module. With careful wording, explicit limitations, and a reproducible repository, this work forms a defensible IEEE-style empirical paper and a strong project-level research submission.
+This paper presented a practical AGA-inspired selective synthetic augmentation framework for fine-grained bird classification on CUB-200-2011. In the saved repository run, selective synthetic admission improved test accuracy from 0.1388 to 0.1505 and macro F1 from 0.1111 to 0.1206 relative to the real-only baseline, while the naive all-synthetic setting slightly reduced performance. The qualitative samples, selection statistics, ablation evidence, confusion matrix, and loss curves collectively support a focused conclusion: in the tested setup, carefully selected synthetic samples were more useful than blind synthetic expansion. As a reproducible empirical study with explicit internal controls and preserved artifacts, the work provides a credible foundation for future higher-budget and multi-seed studies of synthetic data selection in fine-grained recognition.
 
 \begin{thebibliography}{00}
-\bibitem{wah2011} C. Wah, S. Branson, P. Welinder, P. Perona, and S. Belongie, ``The Caltech-UCSD Birds-200-2011 Dataset,'' California Institute of Technology, Tech. Rep. CNS-TR-2011-001, 2011.
-\bibitem{radford2021} A. Radford et al., ``Learning transferable visual models from natural language supervision,'' in \emph{Proc. ICML}, 2021, pp. 8748--8763.
-\bibitem{caron2021} M. Caron et al., ``Emerging properties in self-supervised vision transformers,'' in \emph{Proc. ICCV}, 2021, pp. 9650--9660.
-\bibitem{rahat2025} A. Rahat, M. A. B. S. Nahin, and M. R. Amin, ``Data augmentation for image classification using generative AI,'' in \emph{Proc. WACV}, 2025.
-\bibitem{cubsite} Caltech, ``CUB-200-2011 Dataset,'' Available: https://www.vision.caltech.edu/datasets/cub\_200\_2011/. Accessed: Apr. 25, 2026.
+\bibitem{wah2011} C. Wah, S. Branson, P. Welinder, P. Perona, and S. Belongie, ``The Caltech-UCSD birds-200-2011 dataset,'' California Institute of Technology, Tech. Rep. CNS-TR-2011-001, 2011.
+\bibitem{he2016} K. He, X. Zhang, S. Ren, and J. Sun, ``Deep residual learning for image recognition,'' in \emph{Proc. IEEE Conf. Computer Vision and Pattern Recognition}, 2016, pp. 770--778.
+\bibitem{radford2021} A. Radford et al., ``Learning transferable visual models from natural language supervision,'' in \emph{Proc. International Conference on Machine Learning}, 2021, pp. 8748--8763.
+\bibitem{caron2021} M. Caron et al., ``Emerging properties in self-supervised vision transformers,'' in \emph{Proc. IEEE/CVF International Conference on Computer Vision}, 2021, pp. 9650--9660.
+\bibitem{rahat2025} A. Rahat, M. A. B. S. Nahin, and M. R. Amin, ``Data augmentation for image classification using generative AI,'' in \emph{Proc. IEEE/CVF Winter Conference on Applications of Computer Vision}, 2025.
 \end{thebibliography}
 
 \end{document}

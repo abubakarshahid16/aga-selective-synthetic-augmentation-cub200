@@ -56,3 +56,19 @@ outputs/tables/*_main_metrics.json
 !outputs/tables/exp2_real_plus_all_synthetic_metrics.json
 !outputs/tables/exp3_real_plus_selected_synthetic_metrics.json
 
+# Keep the public repo focused on proof artifacts, not local packaging clutter
+submission_package/
+temp_kaggle_screens/
+tools/
+
+# Keep quick-run proof files, but ignore bulky or redundant quick-run artifacts
+quick_results/checkpoints/
+quick_results/confusion_matrices/
+quick_results/logs/
+quick_results/plots/
+quick_results/samples/
+quick_results/tables/
+quick_results/training_log.csv.d/
+!quick_results/training_log.csv
+!quick_results/fig_loss_curves.png
+!quick_results/fig_accuracy_curves.png

@@ -18,11 +18,12 @@ Pin these files in your explanation order:
 
 1. `README.md`
 2. `paper/ieee_conference_paper.tex`
-3. `paper/PUBLISHABILITY_ASSESSMENT.md`
-4. `paper/ABSTRACT_AND_CLAIMS_CURRENT_EVIDENCE.md`
-5. `paper/PUBLICATION_READINESS_REPORT.md`
-6. `src/run_publication_benchmark.py`
-7. `src/ablation.py`
+3. bundled paper figures under `paper/fig_*.png`
+4. `paper/PUBLISHABILITY_ASSESSMENT.md`
+5. `paper/ABSTRACT_AND_CLAIMS_CURRENT_EVIDENCE.md`
+6. `paper/PUBLICATION_READINESS_REPORT.md`
+7. `src/run_publication_benchmark.py`
+8. `src/ablation.py`
 
 ## Screenshot Checklist For GitHub And Viva
 
@@ -136,6 +137,11 @@ Do not say:
 For the strongest package, keep these together:
 
 - `paper/ieee_conference_paper.tex`
+- `paper/fig_method_pipeline.png`
+- `paper/fig_main_internal_comparison.png`
+- `paper/fig_selection_funnel.png`
+- `paper/fig_ablation_interpretation.png`
+- `paper/fig_selected_loss_curves_ai.png`
 - `paper/PUBLISHABILITY_ASSESSMENT.md`
 - `paper/ABSTRACT_AND_CLAIMS_CURRENT_EVIDENCE.md`
 - `paper/PUBLICATION_READINESS_REPORT.md`

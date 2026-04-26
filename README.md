@@ -1,407 +1,318 @@
-# Improving Automated Generative Data Augmentation with CLIP-DINO Guided Attribute-Aware Sample Selection for Fine-Grained Bird Classification on CUB-200-2011
+# Quality over Quantity: A Practical AGA-Inspired Selective Synthetic Augmentation Framework for Fine-Grained Bird Classification
 
-This project implements a research-style Python pipeline for studying whether AGA-inspired synthetic data can help fine-grained bird classification on CUB-200-2011 when synthetic candidates are filtered before final training. The core idea is not to assume every generated image is useful. Instead, we score synthetic candidates for class consistency, CLIP semantic alignment, DINO-based diversity, class balance, and optional attribute-aware coverage before adding them to the final training set.
+This repository presents a research-style Generative AI project on **fine-grained bird classification** using **selective synthetic augmentation** on **CUB-200-2011**.
 
-The codebase is structured for both a university Generative AI project and a paper draft workflow. It saves reproducible manifests, checkpoints, plots, tables, confusion matrices, and sample grids to disk so the full experimental trail is inspectable.
+The core question is simple:
 
-## Base Paper and Dataset
+> If we generate extra bird images, should we train on all of them, or only on the synthetic samples that look reliable?
 
-- Base paper: AGA / Automated Generative Data Augmentation
-  https://openaccess.thecvf.com/content/WACV2025/html/Rahat_Data_Augmentation_for_Image_Classification_using_Generative_AI_WACV_2025_paper.html
-- Dataset: CUB-200-2011
-  https://www.vision.caltech.edu/datasets/cub_200_2011/
+This project shows that, in the saved repository run, **carefully selected synthetic samples were more useful than blindly adding all generated samples**.
 
-## What This Project Implements
+## Problem
 
-- Experiment 1: real-only baseline
-- Experiment 2: real + all synthetic candidates
-- Experiment 3: real + selected synthetic candidates
-- Ablations:
-  - confidence only
-  - confidence + CLIP
-  - confidence + CLIP + DINO
-  - confidence + CLIP + DINO + class-balance
-  - optional confidence + CLIP + DINO + class-balance + attribute-aware coverage
+Fine-grained classification is difficult because many bird species share the same global shape and differ only in subtle details such as:
 
-## Important Honesty Note
+- beak shape
+- breast pattern
+- crown color
+- wing markings
+- tail structure
 
-This repository implements an AGA-inspired practical generation pipeline, not an exact reproduction of every component in the WACV 2025 paper unless you explicitly replace the generation stage with the exact original method and settings. The provided generator preserves bird foregrounds using CUB bounding boxes plus GrabCut-style foreground estimation and creates context variation through background replacement and appearance perturbation. The downstream scoring, pruning, selection, training, evaluation, and reporting pipeline is fully operational with this practical approximation.
+Synthetic augmentation looks attractive because it can increase training diversity, but in fine-grained tasks it can also hurt performance when generated images contain:
 
-If you want to plug in an external diffusion model, editing model, or API-based generator, use `generate_aga_style_samples.py` as the manifest-producing entry point and preserve the same output schema.
+- wrong species cues
+- unrealistic anatomy
+- noisy backgrounds
+- class drift
+- low-value duplicates
 
-You can also hand off an externally generated manifest directly:
+So the real problem is not only **how to generate more data**, but **how to decide which synthetic images deserve to be trusted**.
 
-```bash
-python src/generate_aga_style_samples.py --external-manifest path/to/synthetic_manifest.csv
-```
+## What This Project Solves
 
-## Project Structure
+This repository implements an **AGA-inspired selective synthetic augmentation pipeline** that:
 
-```text
-project/
-  data/
-  outputs/
-    plots/
-    confusion_matrices/
-    samples/
-    tables/
-    logs/
-    checkpoints/
-  models/
-  src/
-    prepare_cub.py
-    train_baseline.py
-    generate_aga_style_samples.py
-    score_with_classifier.py
-    score_with_clip.py
-    prune_with_dino.py
-    build_selected_dataset.py
-    train_with_augmented_data.py
-    evaluate.py
-    ablation.py
-    plot_results.py
-    utils.py
-  paper_notes/
-    report_assets_checklist.md
-    figure_captions.md
-    tables_needed.md
-  requirements.txt
-  README.md
-```
+1. starts from real CUB-200-2011 bird images
+2. generates synthetic bird-image candidates
+3. scores those candidates using multiple filtering signals
+4. keeps only a small reliable subset
+5. trains and compares multiple experimental settings
 
-## Environment Setup
+The selection pipeline uses:
 
-```bash
-cd project
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-```
+- classifier confidence
+- CLIP semantic alignment
+- DINO-based diversity checking
+- class-balance control
+- optional attribute-aware coverage
 
-If you want CLIP and DINO scoring on GPU, install a CUDA-enabled PyTorch build first.
+The main contribution is not “generate more images.”  
+The main contribution is **selective admission of synthetic samples**.
 
-## Dataset Download and Placement
+## What I Built
 
-1. Download the official `CUB_200_2011.tgz` from the Caltech dataset page.
-2. Extract it so that the raw files live under:
+This repository includes:
 
-```text
-project/data/CUB_200_2011/
-  images/
-  images.txt
-  image_class_labels.txt
-  train_test_split.txt
-  classes.txt
-  bounding_boxes.txt
-  attributes/
-```
+- a full real-only baseline
+- a real + all synthetic experiment
+- a real + selected synthetic experiment
+- ablation studies across filtering variants
+- saved tables, plots, logs, manifests, confusion matrices, and sample grids
+- an IEEE-style manuscript package in [`paper/`](paper/)
 
-3. Run dataset preparation:
+## Headline Results
+
+From [`outputs/tables/experiment_comparison.csv`](outputs/tables/experiment_comparison.csv):
+
+- `exp1_real_only`: accuracy `0.1388`, macro F1 `0.1111`
+- `exp2_real_plus_all_synthetic`: accuracy `0.1367`, macro F1 `0.1025`
+- `exp3_real_plus_selected_synthetic`: accuracy `0.1505`, macro F1 `0.1206`
+
+From [`outputs/tables/accepted_rejected_sample_statistics.csv`](outputs/tables/accepted_rejected_sample_statistics.csv):
+
+- generated candidates: `400`
+- accepted synthetic images: `15`
+- rejected synthetic images: `385`
+- selection rate: `3.75%`
+
+## Main Takeaway
+
+In the saved repository run:
+
+- adding **all** synthetic candidates did **not** help
+- adding a **small selected subset** did help
+- synthetic **quality** mattered more than synthetic **quantity**
+
+## Visual Summary
+
+### 1. Method pipeline
+
+![Method pipeline](paper/fig_method_pipeline.png)
+
+### 2. Real training distribution
+
+![Real training distribution](paper/fig_real_train_distribution_ai.png)
+
+### 3. Synthetic candidates before filtering
+
+![Synthetic candidate grid](paper/fig_synthetic_candidate_grid_ai.png)
+
+### 4. Selection funnel
+
+![Selection funnel](paper/fig_selection_funnel.png)
+
+### 5. Main experiment comparison
+
+![Main experiment comparison](paper/fig_main_internal_comparison.png)
+
+### 6. Ablation interpretation
+
+![Ablation interpretation](paper/fig_ablation_interpretation.png)
+
+### 7. Confusion matrix
+
+![Selected synthetic confusion matrix](paper/fig_selected_confusion_matrix_ai.png)
+
+### 8. Loss curves
+
+![Selected synthetic loss curves](paper/fig_selected_loss_curves_ai.png)
+
+### 9. Qualitative retained vs rejected evidence
+
+![Selection grid](paper/fig_selection_grid_ai.png)
+
+### 10. Accepted synthetic samples
+
+![Accepted synthetic samples](paper/fig_accepted_synthetic_grid_ai.png)
+
+## Screenshots and Proof Trail
+
+These screenshots make the repository easier to review quickly on GitHub.
+
+### Saved results summary
+
+![Results summary screenshot](docs/screenshots/results_summary.png)
+
+### Saved final output bundle
+
+![Kaggle final outputs screenshot](docs/screenshots/kaggle_final_outputs.png)
+
+### Saved loss curve proof
+
+![Loss curve screenshot](docs/screenshots/loss_curve_saved_run.png)
+
+### Training log format proof
+
+![Training log screenshot](docs/screenshots/training_log_format.png)
+
+### Checkpoint and evidence note
+
+![Checkpoint note screenshot](docs/screenshots/checkpoint_note.png)
+
+## Step-by-Step Workflow
+
+### Step 1. Prepare the CUB dataset
+
+The project uses the real **CUB-200-2011** dataset and prepares clean train, validation, and test CSV splits.
+
+Command:
 
 ```bash
 python src/prepare_cub.py --raw-dir data/CUB_200_2011 --output-dir data/prepared --val-ratio 0.1 --seed 42
 ```
 
-This creates `train.csv`, `val.csv`, `test.csv`, `all_metadata.csv`, `class_names.json`, `dataset_summary.json`, and `attributes_image_level.csv` if the CUB attributes files are present.
+### Step 2. Train the real-only baseline
 
-## Baseline Training Command
+This establishes the control result before any synthetic augmentation is added.
 
 ```bash
 python src/train_baseline.py --prepared-dir data/prepared --image-root data/CUB_200_2011/images --model-name convnext_tiny --epochs 30 --batch-size 32 --lr 3e-4 --weight-decay 1e-4 --use-amp --experiment-name exp1_real_only
 ```
 
-For faster debugging:
+### Step 3. Generate synthetic bird-image candidates
 
-```bash
-python src/train_baseline.py --model-name resnet18 --epochs 5 --experiment-name debug_resnet18
-```
-
-## Synthetic Generation Command
+The repository uses an AGA-inspired practical generation pipeline that preserves foreground bird structure and adds controlled variation.
 
 ```bash
 python src/generate_aga_style_samples.py --prepared-dir data/prepared --image-root data/CUB_200_2011/images --output-dir outputs/samples/synthetic_candidates --samples-per-image 2 --max-real-images-per-class 30 --seed 42
 ```
 
-Optional note if you later swap in an external generator:
+### Step 4. Score the synthetic candidates
 
-```bash
-python src/generate_aga_style_samples.py --external-generator-note "manual diffusion refinement applied outside repo"
-```
+Candidates are filtered using:
 
-## Classifier Scoring Command
-
-Use the best real-only checkpoint to verify intended class and confidence:
+- classifier confidence
+- CLIP alignment
+- DINO similarity pruning
 
 ```bash
 python src/score_with_classifier.py --checkpoint outputs/checkpoints/exp1_real_only.pt --synthetic-manifest outputs/samples/synthetic_candidates/synthetic_manifest.csv --synthetic-root outputs/samples/synthetic_candidates --output-csv outputs/tables/synthetic_classifier_scores.csv
-```
-
-## CLIP Scoring Command
-
-```bash
 python src/score_with_clip.py --manifest outputs/samples/synthetic_candidates/synthetic_manifest.csv --class-names data/prepared/class_names.json --model-name ViT-B-32 --pretrained laion2b_s34b_b79k --output-csv outputs/tables/synthetic_clip_scores.csv
-```
-
-## DINO Pruning Command
-
-```bash
 python src/prune_with_dino.py --manifest outputs/samples/synthetic_candidates/synthetic_manifest.csv --similarity-threshold 0.96 --output-csv outputs/tables/synthetic_dino_pruned.csv --embeddings-csv outputs/tables/synthetic_dino_embeddings.csv
 ```
 
-## Selected Dataset Building Command
+### Step 5. Build the selected synthetic subset
+
+This is where the main research idea happens: only reliable synthetic samples are admitted.
 
 ```bash
 python src/build_selected_dataset.py --prepared-dir data/prepared --classifier-scores outputs/tables/synthetic_classifier_scores.csv --clip-scores outputs/tables/synthetic_clip_scores.csv --dino-pruned outputs/tables/synthetic_dino_pruned.csv --confidence-threshold 0.70 --clip-threshold 0.20 --max-synth-to-real-ratio 0.75 --output-csv outputs/tables/selected_synthetic_manifest.csv
 ```
 
-Enable attribute-aware coverage if `attributes_image_level.csv` exists:
+### Step 6. Train the two augmentation settings
 
-```bash
-python src/build_selected_dataset.py --use-attribute-coverage
-```
-
-## Augmented Training Commands
-
-Experiment 2, real + all synthetic:
+First, train with all synthetic candidates.  
+Then, train with only the selected subset.
 
 ```bash
 python src/train_with_augmented_data.py --prepared-dir data/prepared --image-root data/CUB_200_2011/images --synthetic-manifest outputs/samples/synthetic_candidates/synthetic_manifest.csv --synthetic-root outputs/samples/synthetic_candidates --model-name convnext_tiny --use-amp --warmup-on-real --experiment-name exp2_real_plus_all_synthetic
-```
-
-Experiment 3, real + selected synthetic:
-
-```bash
 python src/train_with_augmented_data.py --prepared-dir data/prepared --image-root data/CUB_200_2011/images --synthetic-manifest outputs/tables/selected_synthetic_manifest.csv --synthetic-root outputs/samples/synthetic_candidates --model-name convnext_tiny --use-amp --warmup-on-real --curriculum --curriculum-ratio 0.5 --experiment-name exp3_real_plus_selected_synthetic
 ```
 
-## Evaluation Command
+### Step 7. Run ablations
 
-```bash
-python src/evaluate.py --checkpoint outputs/checkpoints/exp3_real_plus_selected_synthetic.pt --csv-path data/prepared/test.csv --image-root data/CUB_200_2011/images --class-names data/prepared/class_names.json --experiment-name exp3_test_eval
-```
-
-## Ablation Command
+The ablations test whether confidence alone or additional filters explain the saved gains.
 
 ```bash
 python src/ablation.py --python python --project-src src --prepared-dir data/prepared --image-root data/CUB_200_2011/images --model-name convnext_tiny
 ```
 
-For publication-grade reporting, run the ablations across multiple seeds and with full training rather than debug settings:
-
-```bash
-python src/ablation.py --python python --project-src src --prepared-dir data/prepared --image-root data/CUB_200_2011/images --model-name convnext_tiny --epochs 30 --patience 7 --batch-size 32 --image-size 224 --seeds 42 43 44
-```
-
-## Publication Benchmark Command
-
-```bash
-python src/run_publication_benchmark.py --python python --project-src src --prepared-dir data/prepared --image-root data/CUB_200_2011/images --model-name convnext_tiny --epochs 30 --patience 7 --batch-size 32 --image-size 224 --use-amp --seeds 42 43 44 --selected-warmup-on-real --selected-curriculum
-```
-
-This writes multi-seed benchmark outputs to:
-
-- `outputs/tables/publication_benchmark_runs.csv`
-- `outputs/tables/publication_benchmark_summary.csv`
-- `outputs/tables/publication_benchmark_config.json`
-
-## Kaggle Optimized Pipeline
-
-For a restart-safe Kaggle workflow with resumable checkpoints, stronger regularization, test-time augmentation, and a proof bundle for reporting:
-
-```bash
-python src/run_kaggle_best_pipeline.py --model-name convnext_tiny --epochs 35 --patience 8 --batch-size 16 --grad-accum-steps 2 --num-workers 2 --image-size 224 --lr 2.5e-4 --weight-decay 5e-5 --seed 42
-```
-
-See `paper/KAGGLE_RUNBOOK.md` for the recommended setup, fallback settings, and output files to archive.
-
-## Publication Readiness Audit
-
-After running the multi-seed benchmark and ablations, audit the saved outputs before writing strong claims:
-
-```bash
-python src/publication_readiness.py
-```
-
-This writes:
-
-- `outputs/tables/publication_readiness.json`
-- `paper/PUBLICATION_READINESS_REPORT.md`
-
-The audit checks whether the repo has enough evidence for publication-style claims, including:
-
-- presence of the multi-seed benchmark files
-- presence of the ablation files
-- whether the selected method beats both controls in mean accuracy and mean macro-F1
-- whether CLIP/DINO/attribute claims are supported by the ablation table
-- whether a direct base-paper comparison has been documented in `outputs/tables/base_paper_comparison.csv`
-
-## Plotting Command
+### Step 8. Plot results and prepare the paper
 
 ```bash
 python src/plot_results.py --metrics-jsons outputs/tables/exp1_real_only_metrics.json outputs/tables/exp2_real_plus_all_synthetic_metrics.json outputs/tables/exp3_real_plus_selected_synthetic_metrics.json --ablation-summary outputs/tables/ablation_summary.csv
 ```
 
-## Output Folder Explanation
+## What Problems Were Solved
 
-- `outputs/checkpoints`: best model checkpoints
-- `outputs/logs`: script logs
-- `outputs/plots`: training curves, distribution charts, experiment charts, ablation charts
-- `outputs/confusion_matrices`: confusion matrix images
-- `outputs/tables`: histories, metrics, reports, selected manifests, experiment summaries, ablation tables
-- `outputs/samples`: synthetic candidate images and accepted/rejected sample grids
-- `outputs/tables/*_phase_metrics.csv`: warm-up and curriculum phase metrics when staged training is enabled
+This project solves several practical research problems at once:
 
-## Suggested End-to-End Run Order
+- it turns synthetic augmentation into a **selection problem**, not only a generation problem
+- it preserves a full **artifact trail** for review and reproducibility
+- it compares **three internal conditions** instead of reporting one isolated number
+- it provides **ablation evidence**
+- it includes both **quantitative** and **qualitative** proof
+- it packages the work into a paper-ready structure
 
-1. `python src/prepare_cub.py`
-2. `python src/train_baseline.py --experiment-name exp1_real_only`
-3. `python src/generate_aga_style_samples.py`
-4. `python src/score_with_classifier.py --checkpoint outputs/checkpoints/exp1_real_only.pt`
-5. `python src/score_with_clip.py`
-6. `python src/prune_with_dino.py`
-7. `python src/build_selected_dataset.py`
-8. `python src/train_with_augmented_data.py --synthetic-manifest outputs/samples/synthetic_candidates/synthetic_manifest.csv --experiment-name exp2_real_plus_all_synthetic`
-9. `python src/train_with_augmented_data.py --synthetic-manifest outputs/tables/selected_synthetic_manifest.csv --warmup-on-real --curriculum --experiment-name exp3_real_plus_selected_synthetic`
-10. `python src/ablation.py`
-11. `python src/plot_results.py --metrics-jsons ...`
+## Honest Scope and Limitations
 
-## Paper Evidence Gallery
+This repository should be presented honestly as:
 
-This section collects the strongest saved figures and screenshots for the manuscript and project report. Each figure below already exists in `outputs/`.
+- a **practical AGA-inspired** pipeline
+- a **reproducible empirical study**
+- a **strong university project / paper-style artifact**
 
-### Step 1. Synthetic candidate generation
+It should **not** be presented as:
 
-![Synthetic candidate grid](outputs/samples/synthetic_candidate_grid.png)
+- an exact reproduction of the original AGA paper
+- a like-for-like superiority claim over the base paper
+- a completed multi-seed publication benchmark
 
-### Step 2. Real training distribution
+The strongest defensible claim is:
 
-![Real train distribution](outputs/plots/real_train_distribution.png)
+> In the saved local setup on CUB-200-2011, selectively admitted synthetic samples outperformed both a real-only baseline and a naive all-synthetic control.
 
-### Step 3. Selected synthetic distribution
+## Repository Structure
 
-![Selected synthetic distribution](outputs/plots/selected_synthetic_distribution.png)
+```text
+project/
+  data/
+  docs/
+    PROOF_GALLERY.md
+    REVIEWER_PROOF_PACKAGE.md
+    screenshots/
+  outputs/
+    confusion_matrices/
+    logs/
+    plots/
+    samples/
+    tables/
+  paper/
+    ieee_conference_paper.tex
+    fig_*.png
+    GITHUB_PROOF_PACKAGE.md
+    SUBMISSION_PROOF_NOTE.md
+  quick_results/
+  src/
+  submission_package/
+  README.md
+```
 
-### Step 4. Main experiment curves
+## Fast Review Path
 
-Real-only baseline:
+If someone wants to review the project quickly, send them here in this order:
 
-![Real-only accuracy curves](outputs/plots/exp1_real_only_accuracy_curves.png)
+1. [`README.md`](README.md)
+2. [`docs/PROOF_GALLERY.md`](docs/PROOF_GALLERY.md)
+3. [`docs/REVIEWER_PROOF_PACKAGE.md`](docs/REVIEWER_PROOF_PACKAGE.md)
+4. [`paper/ieee_conference_paper.tex`](paper/ieee_conference_paper.tex)
+5. [`outputs/tables/experiment_comparison.csv`](outputs/tables/experiment_comparison.csv)
+6. [`outputs/tables/ablation_summary.csv`](outputs/tables/ablation_summary.csv)
+7. [`outputs/tables/accepted_rejected_sample_statistics.csv`](outputs/tables/accepted_rejected_sample_statistics.csv)
 
-Real plus all synthetic:
+## Submission and Proof Files
 
-![All-synthetic accuracy curves](outputs/plots/exp2_real_plus_all_synthetic_accuracy_curves.png)
+Useful project-facing files:
 
-Real plus selected synthetic:
+- [`paper/ieee_conference_paper.tex`](paper/ieee_conference_paper.tex)
+- [`paper/GITHUB_PROOF_PACKAGE.md`](paper/GITHUB_PROOF_PACKAGE.md)
+- [`paper/SUBMISSION_PROOF_NOTE.md`](paper/SUBMISSION_PROOF_NOTE.md)
+- [`docs/PROOF_GALLERY.md`](docs/PROOF_GALLERY.md)
+- [`docs/REVIEWER_PROOF_PACKAGE.md`](docs/REVIEWER_PROOF_PACKAGE.md)
 
-![Selected-synthetic accuracy curves](outputs/plots/exp3_real_plus_selected_synthetic_accuracy_curves.png)
+Useful supplementary proof from the constrained quick run:
 
-### Step 5. Main experiment comparison
+- [`quick_results/training_log.csv`](quick_results/training_log.csv)
+- [`quick_results/fig_loss_curves.png`](quick_results/fig_loss_curves.png)
+- [`quick_results/fig_accuracy_curves.png`](quick_results/fig_accuracy_curves.png)
 
-![Experiment comparison accuracy](outputs/plots/experiment_comparison_accuracy.png)
+## Base References
 
-Saved single-run headline numbers from `outputs/tables/experiment_comparison.csv`:
+- AGA / WACV 2025 paper: <https://openaccess.thecvf.com/content/WACV2025/html/Rahat_Data_Augmentation_for_Image_Classification_using_Generative_AI_WACV_2025_paper.html>
+- CUB-200-2011 dataset: <https://www.vision.caltech.edu/datasets/cub_200_2011/>
 
-- `exp1_real_only`: accuracy `0.1388`
-- `exp2_real_plus_all_synthetic`: accuracy `0.1367`
-- `exp3_real_plus_selected_synthetic`: accuracy `0.1505`
+## Short GitHub Summary
 
-### Step 6. Accepted vs rejected qualitative evidence
+Use this wording on GitHub, LinkedIn, or in a portfolio:
 
-![Accepted synthetic grid](outputs/samples/accepted_synthetic_grid.png)
-
-![Rejected synthetic grid](outputs/samples/rejected_synthetic_grid.png)
-
-![Real vs synthetic vs accepted vs rejected](outputs/samples/real_vs_synthetic_vs_accepted_vs_rejected_grid.png)
-
-### Step 7. Ablation evidence
-
-![Ablation comparison accuracy](outputs/plots/ablation_comparison_accuracy.png)
-
-Saved single-run ablation summary from `outputs/tables/ablation_summary.csv`:
-
-- `ablation_confidence_only`: accuracy `0.1555`
-- `ablation_confidence_clip`: accuracy `0.1505`
-- `ablation_confidence_clip_dino`: accuracy `0.1505`
-- `ablation_confidence_clip_dino_balance`: accuracy `0.1505`
-- `ablation_full_attribute`: accuracy `0.1505`
-
-### Step 8. Confusion matrices
-
-![Real-only confusion matrix](outputs/confusion_matrices/exp1_real_only_confusion_matrix.png)
-
-![All-synthetic confusion matrix](outputs/confusion_matrices/exp2_real_plus_all_synthetic_confusion_matrix.png)
-
-![Selected-synthetic confusion matrix](outputs/confusion_matrices/exp3_real_plus_selected_synthetic_confusion_matrix.png)
-
-### Step 9. Selection statistics
-
-From `outputs/tables/accepted_rejected_sample_statistics.csv`:
-
-- candidates generated: `400`
-- kept after selection: `15`
-- rejected: `385`
-- selection rate: `3.75%`
-
-### Step 10. Paper preparation order
-
-1. `paper/PUBLISHABILITY_ASSESSMENT.md`
-2. `paper/PUBLICATION_READINESS_REPORT.md`
-3. `paper/PUBLISHABLE_ROUTE.md`
-4. `paper/NOVELTY_AND_CLAIMS.md`
-5. `paper/IEEE_PAPER_OUTLINE.md`
-6. `paper/IEEE_SUBMISSION_CHECKLIST.md`
-
-### Step 11. Submission files
-
-Use these files for the final paper package:
-
-- `paper/ieee_conference_paper.tex`
-- `paper/ABSTRACT_AND_CLAIMS_CURRENT_EVIDENCE.md`
-- `paper/GITHUB_PROOF_PACKAGE.md`
-- `docs/PROOF_GALLERY.md`
-
-## Practical Limitations
-
-- The generation stage is a foreground-preserving practical approximation to AGA, not a guaranteed exact reproduction.
-- CLIP and DINO scoring require model downloads the first time they run.
-- Attribute-aware coverage uses CUB attribute metadata linked to parent real images; synthetic attribute labels are therefore proxy assignments, not direct manual annotations.
-- Warm-up and curriculum scheduling are implemented as staged training runs with saved per-phase metrics rather than as one monolithic trainer.
-- No result numbers are baked into the repository. You must run the experiments and report the saved metrics honestly.
-
-## Report Figure and Screenshot Collection
-
-Use the files under `paper_notes/` as your checklist. In practice, collect:
-
-- dataset preparation summary outputs from `data/prepared/`
-- training curves from `outputs/plots/`
-- confusion matrices from `outputs/confusion_matrices/`
-- accepted/rejected synthetic grids from `outputs/samples/`
-- experiment and ablation tables from `outputs/tables/`
-- logs from `outputs/logs/` to document run settings
-
-When writing the report, clearly separate:
-
-- exact components reproduced from public resources
-- practical approximations
-- your proposed CLIP-DINO attribute-aware selection contribution
-
-If you are preparing an IEEE-style manuscript, start from:
-
-- `paper/IEEE_PAPER_OUTLINE.md`
-- `paper/IEEE_SUBMISSION_CHECKLIST.md`
-- `paper/RESULTS_FILL_TEMPLATE.md`
-- `paper/PUBLICATION_REQUIREMENTS.md`
-- `paper/PUBLISHABLE_ROUTE.md`
-- `paper/NOVELTY_AND_CLAIMS.md`
-
-## Suggested Claim Framing
-
-You can safely frame the method as:
-
-“An AGA-inspired generative augmentation pipeline with a CLIP-DINO guided attribute-aware sample-selection module for fine-grained bird classification on CUB-200-2011.”
-
-That wording is honest about the generation stage while still highlighting the paper contribution you are adding.
-
-For the safest manuscript wording with the current evidence, prefer:
-
-"An AGA-inspired generative augmentation pipeline with a selective sample-admission module for fine-grained bird classification on CUB-200-2011."
+> This project presents a practical AGA-inspired selective synthetic augmentation framework for fine-grained bird classification on CUB-200-2011. The saved repository outputs show that carefully selected synthetic samples improved over both a real-only baseline and a naive all-synthetic condition, while the repository preserves the full research trail through plots, tables, logs, confusion matrices, qualitative grids, and manuscript assets.

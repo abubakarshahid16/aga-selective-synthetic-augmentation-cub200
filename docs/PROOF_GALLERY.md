@@ -1,75 +1,69 @@
 # Proof Gallery
 
-This file is the shortest review path for GitHub visitors and for a project viva. It points to the exact evidence artifacts included in the repository.
+This document gathers the strongest visual and quantitative evidence from the repository in one place for fast review.
 
-## 1. Dataset Evidence
+## Main Claim
 
-- Dataset summary: [data/prepared/dataset_summary.json](../data/prepared/dataset_summary.json)
-- Training split CSV: [data/prepared/train.csv](../data/prepared/train.csv)
-- Validation split CSV: [data/prepared/val.csv](../data/prepared/val.csv)
-- Test split CSV: [data/prepared/test.csv](../data/prepared/test.csv)
-- Class names: [data/prepared/class_names.json](../data/prepared/class_names.json)
+The central claim supported by the saved outputs is:
 
-Note:
-The full CUB-200-2011 image corpus is not committed to GitHub because it is large and should be downloaded from the official dataset source.
+`Selective synthetic augmentation was more useful than blind synthetic augmentation in the saved CUB-200-2011 setup.`
 
-## 2. Pipeline Screenshots And Qualitative Proof
+## Quantitative Headline
 
-Synthetic candidate examples:
+From `outputs/tables/experiment_comparison.csv`:
 
-![Synthetic candidates](../outputs/samples/synthetic_candidate_grid.png)
+- `exp1_real_only`: `0.1388` accuracy
+- `exp2_real_plus_all_synthetic`: `0.1367` accuracy
+- `exp3_real_plus_selected_synthetic`: `0.1505` accuracy
 
-Accepted synthetic samples:
+From `outputs/tables/accepted_rejected_sample_statistics.csv`:
 
-![Accepted synthetic samples](../outputs/samples/accepted_synthetic_grid.png)
+- generated candidates: `400`
+- accepted synthetic samples: `15`
+- rejected synthetic samples: `385`
+- selection rate: `3.75%`
 
-Rejected synthetic samples:
+## Figure 1. Synthetic Candidate Generation
 
-![Rejected synthetic samples](../outputs/samples/rejected_synthetic_grid.png)
+![Synthetic candidate grid](../outputs/samples/synthetic_candidate_grid.png)
 
-Combined qualitative comparison:
+This figure shows the candidate pool produced before filtering.
 
-![Combined qualitative comparison](../outputs/samples/real_vs_synthetic_vs_accepted_vs_rejected_grid.png)
+## Figure 2. Accepted and Rejected Sample Evidence
 
-## 3. Training And Evaluation Proof
+![Real vs synthetic vs accepted vs rejected](../outputs/samples/real_vs_synthetic_vs_accepted_vs_rejected_grid.png)
 
-Main experiment comparison:
+This figure illustrates the purpose of the selection module by contrasting retained and discarded samples.
 
-![Experiment comparison](../outputs/plots/experiment_comparison_accuracy.png)
+## Figure 3. Main Experiment Comparison
 
-Ablation comparison:
+![Main experiment comparison](../outputs/plots/experiment_comparison_accuracy.png)
+
+This plot visually summarizes the key repository result: selected synthetic augmentation outperformed both internal controls.
+
+## Figure 4. Ablation Comparison
 
 ![Ablation comparison](../outputs/plots/ablation_comparison_accuracy.png)
 
-Baseline confusion matrix:
+This plot shows that the selective framework is supported, while the current saved run does not justify claiming every extra module improved over confidence-only filtering.
 
-![Baseline confusion matrix](../outputs/confusion_matrices/exp1_real_only_confusion_matrix.png)
+## Figure 5. Selected Synthetic Training Evidence
 
-Selected synthetic confusion matrix:
+![Selected synthetic loss curves](../paper/fig_selected_loss_curves_ai.png)
+
+This figure gives a stronger paper-ready view of the saved learning behavior for the selected synthetic setting.
+
+## Figure 6. Selected Synthetic Confusion Matrix
 
 ![Selected synthetic confusion matrix](../outputs/confusion_matrices/exp3_real_plus_selected_synthetic_confusion_matrix.png)
 
-## 4. Tables Used In The Paper
+This figure provides additional qualitative evidence of final prediction behavior.
 
-- Main comparison: [outputs/tables/experiment_comparison.csv](../outputs/tables/experiment_comparison.csv)
-- Ablation summary: [outputs/tables/ablation_summary.csv](../outputs/tables/ablation_summary.csv)
-- Selection statistics: [outputs/tables/accepted_rejected_sample_statistics.csv](../outputs/tables/accepted_rejected_sample_statistics.csv)
-- Diversity statistics: [outputs/tables/sample_diversity_statistics.csv](../outputs/tables/sample_diversity_statistics.csv)
-- DINO pruning stats: [outputs/tables/dino_pruning_stats.csv](../outputs/tables/dino_pruning_stats.csv)
-- Publication readiness audit: [outputs/tables/publication_readiness.json](../outputs/tables/publication_readiness.json)
+## Reviewer Summary
 
-## 5. Paper Files
+The repository is strongest when presented as:
 
-- IEEE draft: [paper/ieee_conference_paper.tex](../paper/ieee_conference_paper.tex)
-- Publishability assessment: [paper/PUBLISHABILITY_ASSESSMENT.md](../paper/PUBLISHABILITY_ASSESSMENT.md)
-- Abstract and claims: [paper/ABSTRACT_AND_CLAIMS_CURRENT_EVIDENCE.md](../paper/ABSTRACT_AND_CLAIMS_CURRENT_EVIDENCE.md)
-- GitHub proof package: [paper/GITHUB_PROOF_PACKAGE.md](../paper/GITHUB_PROOF_PACKAGE.md)
-
-## 6. Reviewer Summary
-
-The strongest evidence currently included in the repository shows:
-
-- selected synthetic augmentation outperformed the real-only baseline in the saved run
-- selected synthetic augmentation outperformed naive all-synthetic augmentation in the saved run
-- confidence-only filtering was the strongest ablation in the saved outputs
-- the paper should be presented as an AGA-inspired empirical study under constrained compute
+- a reproducible AGA-inspired empirical study
+- a selective sample-admission framework for synthetic augmentation
+- a project with saved tables, plots, logs, checkpoints, and manuscript assets
+- evidence that filtering synthetic samples mattered more than simply adding more synthetic data
