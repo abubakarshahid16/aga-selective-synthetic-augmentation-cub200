@@ -306,6 +306,14 @@ Useful supplementary proof from the constrained quick run:
 - [`quick_results/fig_loss_curves.png`](quick_results/fig_loss_curves.png)
 - [`quick_results/fig_accuracy_curves.png`](quick_results/fig_accuracy_curves.png)
 
+## Citation
+
+GitHub citation metadata is available in [`CITATION.cff`](CITATION.cff).
+
+If you reference this project, cite it as a repository and describe it as:
+
+> An AGA-inspired selective synthetic augmentation framework for fine-grained bird classification on CUB-200-2011, released with manuscript assets, result figures, and supplementary proof artifacts.
+
 ## Base References
 
 - AGA / WACV 2025 paper: <https://openaccess.thecvf.com/content/WACV2025/html/Rahat_Data_Augmentation_for_Image_Classification_using_Generative_AI_WACV_2025_paper.html>
