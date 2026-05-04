@@ -1,17 +1,17 @@
-# 🚀 Selective Synthetic Augmentation for Fine-Grained Classification (CUB-200)
+# Selective Synthetic Augmentation for Fine-Grained Classification (CUB-200)
 
-> 🔥 **Most augmentation methods assume more data is better. This project proves that better data is what actually matters.**
+> **Most augmentation methods assume more data is better. This project proves that better data is what actually matters.**
 
 This repository presents a research-grade MLOps pipeline demonstrating how **Selective Synthetic Augmentation (SSA)** drastically improves fine-grained bird classification (CUB-200-2011).
 
-## 🧠 Problem
+## Problem
 
 Fine-grained classification tasks (like differentiating bird species) suffer from major data bottlenecks:
 1. **Datasets are incredibly small** because they require expert domain knowledge to label.
 2. **Synthetic data is inherently noisy.** Generative models often produce anatomical errors or hallucinate incorrect species cues.
 3. **Poor quality data reduces performance.** Blindly injecting all generated images into the training pipeline causes class drift and degrades model accuracy.
 
-## 💡 Solution
+## Solution
 
 Instead of treating all generated images as equal, this project introduces a stringent filtering pipeline:
 1. **Generate synthetic candidate images.**
@@ -20,7 +20,7 @@ Instead of treating all generated images as equal, this project introduces a str
 
 ---
 
-## ⚙️ Pipeline
+## Pipeline
 
 ```mermaid
 graph LR
@@ -35,7 +35,7 @@ graph LR
 
 ---
 
-## 📊 Results
+## Results
 
 By filtering out the noise, our ResNet-50 model trained on the SSA-curated dataset significantly outperformed both the baseline and the naive augmentation strategy.
 
@@ -45,11 +45,11 @@ By filtering out the noise, our ResNet-50 model trained on the SSA-curated datas
 | + Synthetic (All Data)     | 79.1        | 78.5      | 79.2   | 78.8     |
 | **+ Selective SSA (Ours)** | **82.5**    | **82.1**  | **82.7**| **82.4** |
 
-👉 *See full details in [results.md](results.md) and our generated [Kaggle Training Log](quick_results/kaggle_training_log.csv).*
+*See full details in [results.md](results.md) and our generated [Kaggle Training Log](quick_results/kaggle_training_log.csv).*
 
 ---
 
-## 🔍 Ablation Study
+## Ablation Study
 
 To prove that the improvement is not random and that each filtering component contributes meaningfully, we conducted an ablation study:
 
@@ -63,7 +63,7 @@ To prove that the improvement is not random and that each filtering component co
 
 ---
 
-## 🧠 Selective Synthetic Augmentation (SSA) Strategy
+## Selective Synthetic Augmentation (SSA) Strategy
 
 Our filtering mechanism ensures that only the most reliable synthetic images reach the training set. We use three core signals:
 
@@ -81,7 +81,7 @@ We ensure the predicted class of the synthetic image perfectly matches the inten
 
 ---
 
-## 📈 Visualizations
+## Visualizations
 
 ### The Value of Selection
 ![t-SNE Plot](visuals/tsne_plot.png)
@@ -103,7 +103,7 @@ We ensure the predicted class of the synthetic image perfectly matches the inten
 
 ---
 
-## 🧪 Tech Stack
+## Tech Stack
 
 - **Deep Learning Framework:** PyTorch
 - **Architecture:** ResNet-50
@@ -113,7 +113,7 @@ We ensure the predicted class of the synthetic image perfectly matches the inten
 
 ---
 
-## 📌 Key Takeaways
+## Key Takeaways
 
 - **Quality > Quantity:** Adding 10,000 bad images hurts your model. Adding 500 perfect images transforms it.
 - **Selective augmentation improves generalization:** By carefully filtering data, the model learns the correct subtle features of fine-grained categories.
@@ -121,7 +121,7 @@ We ensure the predicted class of the synthetic image perfectly matches the inten
 
 ---
 
-## 🧠 Why SSA Works
+## Why SSA Works
 
 For a deep learning model, bad data acts as adversarial noise. SSA works because it:
 - **Removes low-quality synthetic samples** before they can pollute the gradient updates.
@@ -131,13 +131,13 @@ For a deep learning model, bad data acts as adversarial noise. SSA works because
 
 ---
 
-## ✅ Use Cases & Production Thinking
+## Use Cases & Production Thinking
 
 While this repository demonstrates SSA on bird classification, the paradigm is universally applicable to any domain where data is scarce or expensive to label:
 
-- 🏥 **Medical Imaging:** Generating synthetic MRIs or X-Rays, filtering out anatomically impossible scans before training diagnostic models.
-- 💳 **Fraud Detection:** Synthesizing rare fraudulent transaction patterns and ensuring they match real-world distributions.
-- 🛰️ **Satellite Imagery:** Enhancing low-resolution datasets while preventing hallucinated geographical features.
+- **Medical Imaging:** Generating synthetic MRIs or X-Rays, filtering out anatomically impossible scans before training diagnostic models.
+- **Fraud Detection:** Synthesizing rare fraudulent transaction patterns and ensuring they match real-world distributions.
+- **Satellite Imagery:** Enhancing low-resolution datasets while preventing hallucinated geographical features.
 
 ### MLOps Integration
 SSA is designed to be integrated directly into MLOps pipelines. As a model is continuously retrained in production, it can be used to recursively judge and filter newly generated synthetic batches, creating a self-improving data flywheel.

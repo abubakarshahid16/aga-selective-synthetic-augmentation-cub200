@@ -1,4 +1,4 @@
-# 📊 Results
+# Results
 
 ## Performance Comparison
 The following table summarizes the performance of our Selective Synthetic Augmentation (SSA) framework compared to a real-only baseline and a naive all-synthetic augmentation baseline using a ResNet-50 architecture.
@@ -13,7 +13,7 @@ Our Selective Synthetic Augmentation (SSA) yields a **+4.3% absolute accuracy im
 
 ---
 
-## 🔍 Ablation Study
+## Ablation Study
 
 To understand the contribution of each filtering component in the SSA pipeline, we conducted an ablation study.
 
