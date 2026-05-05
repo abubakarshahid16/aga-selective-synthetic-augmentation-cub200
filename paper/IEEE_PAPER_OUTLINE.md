@@ -4,7 +4,7 @@
 
 An AGA-Inspired Selective Synthetic Augmentation Framework for Fine-Grained Bird Classification on CUB-200-2011
 
-## Abstract Template
+## Abstract Draft
 
 This paper studies whether synthetic augmentation can improve fine-grained bird classification on CUB-200-2011 when generated candidates are filtered before training rather than accepted blindly. We use an AGA-inspired foreground-preserving generation pipeline and evaluate a selective admission module based on classifier confidence, CLIP semantic consistency, DINO diversity pruning, class-balance constraints, and optional attribute-aware coverage. The central claim should be that selective filtering can outperform naive all-synthetic augmentation under the implemented setup if supported by the saved benchmark files. To avoid overstating evidence, all final quantitative claims should come from `outputs/tables/publication_benchmark_summary.csv` and `outputs/tables/ablation_summary.csv`, with mean and standard deviation reported across seeds.
 
@@ -92,9 +92,7 @@ Use:
 #### D. Qualitative Figures
 
 Use:
-- `outputs/samples/accepted_synthetic_grid.png`
-- `outputs/samples/rejected_synthetic_grid.png`
-- `outputs/samples/real_vs_synthetic_vs_accepted_vs_rejected_grid.png`
+- qualitative sample grids should be regenerated locally when needed
 
 ### VI. Discussion
 

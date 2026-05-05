@@ -10,7 +10,7 @@ authors:
     given-names: "Noman"
 repository-code: "https://github.com/abubakarshahid16/aga-selective-synthetic-augmentation-cub200"
 url: "https://github.com/abubakarshahid16/aga-selective-synthetic-augmentation-cub200"
-abstract: "AGA-inspired selective synthetic augmentation framework for fine-grained bird classification on CUB-200-2011 with manuscript assets, saved figures, proof screenshots, and supplementary training-log artifacts."
+abstract: "AGA-inspired selective synthetic augmentation framework for fine-grained bird classification on CUB-200-2011 with source code, manuscript notes, and compact tabular experiment artifacts."
 keywords:
   - generative-ai
   - computer-vision

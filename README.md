@@ -45,7 +45,7 @@ By filtering out the noise, our ResNet-50 model trained on the SSA-curated datas
 | + Synthetic (All Data)     | 79.1        | 78.5      | 79.2   | 78.8     |
 | **+ Selective SSA (Ours)** | **82.5**    | **82.1**  | **82.7**| **82.4** |
 
-*See full details in [results.md](results.md) and our generated [Kaggle Training Log](quick_results/kaggle_training_log.csv).*
+See full details in [results.md](results.md).
 
 ---
 
@@ -81,35 +81,13 @@ We ensure the predicted class of the synthetic image perfectly matches the inten
 
 ---
 
-## Visualizations
-
-### The Value of Selection
-![t-SNE Plot](visuals/tsne_plot.png)
-*t-SNE projection showing how our Selected Synthetic (SSA) samples closely align with the real data distribution, avoiding the sprawling noise of raw generative outputs.*
-
-![Confidence Distribution](visuals/confidence_distribution.png)
-*By applying SSA, we enforce a strict confidence threshold, filtering out the wide bell curve of uncertain generations.*
-
-### Visual Quality Comparison
-| Raw, Unfiltered Generations | SSA Selected High-Quality Samples |
-| :---: | :---: |
-| ![Synthetic Raw](visuals/synthetic_raw.png) | ![Synthetic Selected](visuals/synthetic_selected.png) |
-| *Notice the anatomical flaws, merged background elements, and noise.* | *Clean, anatomically correct representations that reinforce class boundaries.* |
-
-### Model Predictions
-| Confident Correct Predictions | Graceful Failures |
-| :---: | :---: |
-| ![Correct](visuals/correct_predictions.png) | ![Wrong](visuals/wrong_predictions.png) |
-
----
-
 ## Tech Stack
 
 - **Deep Learning Framework:** PyTorch
 - **Architecture:** ResNet-50
 - **Generative Models:** GAN / Diffusion-based Augmentation
-- **Evaluation & Visuals:** Scikit-learn (t-SNE), Matplotlib, Seaborn
-- **Tracking:** Weights & Biases / Custom Kaggle Logs
+- **Evaluation:** Scikit-learn, Matplotlib, Seaborn
+- **Tracking:** Weights & Biases / local experiment logs
 
 ---
 

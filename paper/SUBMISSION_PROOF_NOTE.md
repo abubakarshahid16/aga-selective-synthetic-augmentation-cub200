@@ -13,7 +13,7 @@ Included items:
 What the bundle proves:
 
 - the manuscript follows the IEEE conference paper structure
-- the main reported results come from the saved repository/Kaggle run
+- the main reported results come from the saved repository run
 - the paper figures used in the manuscript are bundled locally
 - a real supplementary training log and real optimization curves exist
 
