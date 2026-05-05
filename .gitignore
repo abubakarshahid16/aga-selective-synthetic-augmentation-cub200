@@ -60,7 +60,6 @@ temp_kaggle_screens/
 tools/
 visuals/
 docs/screenshots/
-paper/fig_*.png
 
 # Ignore quick-run artifacts
 quick_results/*.png

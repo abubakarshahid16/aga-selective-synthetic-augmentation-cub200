@@ -74,7 +74,7 @@ Fig.~\ref{fig:real_distribution} shows the training-set distribution used in the
 
 \begin{figure}[t]
 \centering
-\fbox{\parbox{0.9\linewidth}{Figure artifact removed from the public repository.}}
+\includegraphics[width=\linewidth]{fig_real_train_distribution_ai.png}
 \caption{Real training distribution across the prepared CUB-200-2011 split. Most classes contain nearly the same number of real training images, indicating a largely balanced starting point.}
 \label{fig:real_distribution}
 \end{figure}
@@ -84,7 +84,7 @@ The proposed workflow is summarized in Fig.~\ref{fig:method_pipeline}. The pipel
 
 \begin{figure*}[t]
 \centering
-\fbox{\parbox{0.9\textwidth}{Figure artifact removed from the public repository.}}
+\includegraphics[width=\textwidth]{fig_method_pipeline.png}
 \caption{Overview of the proposed AGA-inspired selective synthetic augmentation framework. Synthetic candidates are generated first and then filtered through confidence screening, CLIP semantic alignment, DINO diversity pruning, class-balance control, and optional attribute-aware coverage before final training.}
 \label{fig:method_pipeline}
 \end{figure*}
@@ -96,7 +96,7 @@ Representative synthetic candidates are shown in Fig.~\ref{fig:synthetic_candida
 
 \begin{figure*}[t]
 \centering
-\fbox{\parbox{0.9\textwidth}{Figure artifact removed from the public repository.}}
+\includegraphics[width=\textwidth]{fig_synthetic_candidate_grid_ai.png}
 \caption{Representative AGA-inspired synthetic candidates before selective filtering. The candidate pool is visually diverse, but not every sample is equally suitable for fine-grained training.}
 \label{fig:synthetic_candidates}
 \end{figure*}
@@ -115,7 +115,7 @@ The admission strategy is intentionally conservative. In the saved run, 400 synt
 
 \begin{figure}[t]
 \centering
-\fbox{\parbox{0.9\linewidth}{Figure artifact removed from the public repository.}}
+\includegraphics[width=\linewidth]{fig_selection_funnel.png}
 \caption{Selective admission funnel. Out of 400 generated candidates, only 15 were admitted for final training, giving a 3.75\% acceptance rate.}
 \label{fig:selection_funnel}
 \end{figure}
@@ -155,7 +155,7 @@ This is the core empirical result of the paper: simply adding more synthetic dat
 
 \begin{figure}[t]
 \centering
-\fbox{\parbox{0.9\linewidth}{Figure artifact removed from the public repository.}}
+\includegraphics[width=\linewidth]{fig_main_internal_comparison.png}
 \caption{Main internal comparison across the three experimental settings. Selected synthetic admission improved both test accuracy and macro F1 over real-only training and naive all-synthetic training.}
 \label{fig:main_internal_comparison}
 \end{figure}
@@ -184,7 +184,7 @@ Fig.~\ref{fig:ablation_interpretation} helps interpret the ablation behavior. Th
 
 \begin{figure}[t]
 \centering
-\fbox{\parbox{0.9\linewidth}{Figure artifact removed from the public repository.}}
+\includegraphics[width=\linewidth]{fig_ablation_interpretation.png}
 \caption{Ablation interpretation for the selective admission pipeline. Confidence-only filtering achieved the highest saved accuracy, while the full pipeline matched the selected-synthetic main result.}
 \label{fig:ablation_interpretation}
 \end{figure}
@@ -214,7 +214,7 @@ Fig.~\ref{fig:confusion_matrix} presents the confusion matrix for the selected-s
 
 \begin{figure}[t]
 \centering
-\fbox{\parbox{0.9\linewidth}{Figure artifact removed from the public repository.}}
+\includegraphics[width=\linewidth]{fig_selected_confusion_matrix_ai.png}
 \caption{Confusion matrix for the selected-synthetic experiment. The diagonal trend indicates correct predictions for some classes, while the off-diagonal activity reflects persistent fine-grained confusion.}
 \label{fig:confusion_matrix}
 \end{figure}
@@ -223,7 +223,7 @@ Fig.~\ref{fig:loss_curves} provides complementary optimization evidence. The tra
 
 \begin{figure}[t]
 \centering
-\fbox{\parbox{0.9\linewidth}{Figure artifact removed from the public repository.}}
+\includegraphics[width=\linewidth]{fig_selected_loss_curves_ai.png}
 \caption{Training and validation loss curves for the selected-synthetic experiment. The smooth decline indicates stable optimization, while the slower validation improvement suggests remaining generalization limits.}
 \label{fig:loss_curves}
 \end{figure}
@@ -233,7 +233,7 @@ Fig.~\ref{fig:selection_grid} compares real images, synthetic candidates, accept
 
 \begin{figure*}[t]
 \centering
-\fbox{\parbox{0.9\textwidth}{Figure artifact removed from the public repository.}}
+\includegraphics[width=\textwidth]{fig_selection_grid_ai.png}
 \caption{Qualitative comparison of real images, synthetic candidates, accepted synthetic samples, and rejected synthetic samples. The retained examples are visually more suitable for training than the discarded ones.}
 \label{fig:selection_grid}
 \end{figure*}
@@ -242,7 +242,7 @@ Fig.~\ref{fig:accepted_grid} isolates the accepted synthetic samples used in the
 
 \begin{figure*}[t]
 \centering
-\fbox{\parbox{0.9\textwidth}{Figure artifact removed from the public repository.}}
+\includegraphics[width=\textwidth]{fig_accepted_synthetic_grid_ai.png}
 \caption{Accepted synthetic samples retained by the selective admission process. The final admitted set is small but visually diverse and more credible for training than the broader candidate pool.}
 \label{fig:accepted_grid}
 \end{figure*}
